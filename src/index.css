@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+.hero-section {
+  background-image: url('https://static.readdy.ai/image/adf562689ffc9835cd635ce609fa5c86/380cf79f32b4d37fdc1c51ef63729a8a.jfif');
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-overlay {
+  background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.4) 100%);
+}
+
+.stat-item {
+  position: relative;
+}
+
+.stat-item::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 25%;
+  height: 50%;
+  width: 1px;
+  background-color: #e5e7eb;
+}
+
+.stat-item:last-child::after {
+  display: none;
+}
+
+.cta-section {
+  background-image: url('https://readdy.ai/api/search-image?query=A%20hopeful%20scene%20in%20Somalia%20with%20volunteers%20and%20community%20members%20working%20together%20on%20humanitarian%20projects.%20The%20image%20shows%20diverse%20groups%20of%20people%20collaborating%20in%20a%20rural%20setting%20with%20traditional%20Somali%20architecture%20visible.%20The%20lighting%20is%20warm%20and%20inspiring%2C%20creating%20a%20sense%20of%20community%20and%20positive%20impact.%20The%20composition%20has%20space%20for%20text%20overlay%20and%20maintains%20a%20professional%2C%20documentary-style%20aesthetic%20that%20conveys%20hope%20and%20solidarity.&width=1920&height=600&seq=cta1&orientation=landscape');
+  background-size: cover;
+  background-position: center;
+}
+
+input:focus, button:focus {
+  outline: none;
+}
+
+.custom-checkbox {
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+  border-color: #d1d5db;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.custom-checkbox .checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.language-selector {
+  position: relative;
+}
+
+.language-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  min-width: 120px;
+}
+
+.language-selector:hover .language-dropdown {
+  display: block;
+}
