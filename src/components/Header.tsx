@@ -31,14 +31,14 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center flex-shrink-0">
             <button onClick={() => handleNavClick('home')} className="flex items-center">
-              <img 
-                src="/logo-small@2x.png" 
-                alt="Khadija Foundation Logo" 
+              <img
+                src={`${import.meta.env.BASE_URL}logo-small@2x.png`}
+                alt="Khadija Foundation Logo"
                 className="h-16 md:h-20 object-contain"
               />
             </button>
           </div>
-          
+
           <nav className="hidden lg:flex space-x-8 flex-1 justify-center">
             {navItems.map((item) => (
               <button
@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
               </button>
             ))}
           </nav>
-          
+
           <div className="flex items-center space-x-4 flex-shrink-0">
             <div className="language-selector hidden md:block">
               <button className="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
@@ -67,12 +67,12 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">Somali</a>
               </div>
             </div>
-            
+
             <a href="#" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors whitespace-nowrap text-sm">
               Donate Now
             </a>
-            
-            <button 
+
+            <button
               className="lg:hidden w-10 h-10 flex items-center justify-center text-gray-700 hover:text-blue-600 transition-colors"
               onClick={toggleMenu}
             >
@@ -80,8 +80,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
             </button>
           </div>
         </div>
-        
-        {/* Mobile Menu */}
+
         {isMenuOpen && (
           <div className="lg:hidden border-t border-gray-200">
             <div className="px-2 pt-2 pb-4 space-y-1">
