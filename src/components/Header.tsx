@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
               <img
                 src={`${import.meta.env.BASE_URL}logo-small@2x.png`}
                 alt="Khadija Foundation Logo"
-                className="h-16 md:h-20 object-contain"
+                className="h-10 md:h-16 object-contain"
               />
             </button>
           </div>
@@ -45,8 +45,8 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
                 className={`font-medium transition-colors ${currentPage === item.id
-                    ? 'text-blue-600'
-                    : 'text-gray-800 hover:text-blue-600'
+                  ? 'text-blue-600'
+                  : 'text-gray-800 hover:text-blue-600'
                   }`}
               >
                 {item.label}
@@ -91,8 +91,8 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
                   className={`block w-full text-left px-3 py-2 text-base font-medium rounded-md transition-colors ${currentPage === item.id
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-800 hover:text-blue-600 hover:bg-gray-50'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-800 hover:text-blue-600 hover:bg-gray-50'
                     }`}
                 >
                   {item.label}

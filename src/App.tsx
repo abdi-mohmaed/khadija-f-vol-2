@@ -28,9 +28,9 @@ function App() {
         return (
           <>
             <Hero setCurrentPage={setCurrentPage} />
+            <RecentProjects />
             <Programs setCurrentPage={setCurrentPage} />
             <Impact />
-            <RecentProjects />
             <Testimonials />
             <CallToAction setCurrentPage={setCurrentPage} />
             <Newsletter />
