@@ -44,11 +44,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`font-medium transition-colors ${
-                  currentPage === item.id
+                className={`font-medium transition-colors ${currentPage === item.id
                     ? 'text-blue-600'
                     : 'text-gray-800 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 {item.label}
               </button>
@@ -68,9 +67,12 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
               </div>
             </div>
 
-            <a href="#" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors whitespace-nowrap text-sm">
+            <button
+              onClick={() => handleNavClick('contact')}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
+            >
               Donate Now
-            </a>
+            </button>
 
             <button
               className="lg:hidden w-10 h-10 flex items-center justify-center text-gray-700 hover:text-blue-600 transition-colors"
@@ -88,11 +90,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className={`block w-full text-left px-3 py-2 text-base font-medium rounded-md transition-colors ${
-                    currentPage === item.id
+                  className={`block w-full text-left px-3 py-2 text-base font-medium rounded-md transition-colors ${currentPage === item.id
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-800 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </button>

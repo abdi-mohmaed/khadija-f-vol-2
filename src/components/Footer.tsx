@@ -1,7 +1,11 @@
 import React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail } from 'lucide-react';
 
-const Footer = () => {
+interface FooterProps {
+  setCurrentPage: (page: string) => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ setCurrentPage }) => {
   return (
     <footer className="bg-gray-900 text-white pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,7 +30,7 @@ const Footer = () => {
               </a>
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-6">Our Programs</h3>
             <ul className="space-y-3">
@@ -38,19 +42,19 @@ const Footer = () => {
               <li><a href="#" className="text-gray-400 hover:text-white transition">Water Access Projects</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-400 hover:text-white transition">About Us</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Our Impact</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">News & Updates</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Volunteer</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Donate</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Contact Us</a></li>
+              <li><button onClick={() => setCurrentPage('about')} className="text-gray-400 hover:text-white transition">About Us</button></li>
+              <li><button onClick={() => setCurrentPage('home')} className="text-gray-400 hover:text-white transition">Our Impact</button></li>
+              <li><button onClick={() => setCurrentPage('home')} className="text-gray-400 hover:text-white transition">News & Updates</button></li>
+              <li><button onClick={() => setCurrentPage('contact')} className="text-gray-400 hover:text-white transition">Volunteer</button></li>
+              <li><button onClick={() => setCurrentPage('contact')} className="text-gray-400 hover:text-white transition">Donate</button></li>
+              <li><button onClick={() => setCurrentPage('contact')} className="text-gray-400 hover:text-white transition">Contact Us</button></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-6">Contact Information</h3>
             <ul className="space-y-3">
@@ -69,7 +73,7 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-500 text-sm mb-4 md:mb-0">

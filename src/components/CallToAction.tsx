@@ -1,6 +1,10 @@
 import React from 'react';
 
-const CallToAction = () => {
+interface CallToActionProps {
+  setCurrentPage: (page: string) => void;
+}
+
+const CallToAction: React.FC<CallToActionProps> = ({ setCurrentPage }) => {
   return (
     <section className="cta-section py-16 md:py-24 relative">
       <div className="absolute inset-0 bg-blue-600/80"></div>
@@ -11,12 +15,18 @@ const CallToAction = () => {
             Your support can transform lives and communities across Somaliland. Together, we can build a brighter future for those in need.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="#" className="bg-white text-blue-600 px-8 py-4 rounded-lg font-medium hover:bg-gray-100 transition whitespace-nowrap">
+            <button
+              onClick={() => setCurrentPage('contact')}
+              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-medium hover:bg-gray-100 transition whitespace-nowrap"
+            >
               Donate Now
-            </a>
-            <a href="#" className="bg-transparent text-white border-2 border-white px-8 py-4 rounded-lg font-medium hover:bg-white/10 transition whitespace-nowrap">
+            </button>
+            <button
+              onClick={() => setCurrentPage('contact')}
+              className="bg-transparent text-white border-2 border-white px-8 py-4 rounded-lg font-medium hover:bg-white/10 transition whitespace-nowrap"
+            >
               Become a Volunteer
-            </a>
+            </button>
           </div>
         </div>
       </div>

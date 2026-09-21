@@ -27,12 +27,12 @@ function App() {
       default:
         return (
           <>
-            <Hero />
-            <Programs />
+            <Hero setCurrentPage={setCurrentPage} />
+            <Programs setCurrentPage={setCurrentPage} />
             <Impact />
             <RecentProjects />
             <Testimonials />
-            <CallToAction />
+            <CallToAction setCurrentPage={setCurrentPage} />
             <Newsletter />
           </>
         );
@@ -43,7 +43,7 @@ function App() {
     <div className="bg-gray-50">
       <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
       {renderPage()}
-      <Footer />
+      <Footer setCurrentPage={setCurrentPage} />
     </div>
   );
 }
