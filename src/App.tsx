@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Programs from './components/Programs';
@@ -11,8 +12,11 @@ import Footer from './components/Footer';
 import AboutUs from './components/AboutUs';
 import OurPrograms from './components/OurPrograms';
 import Contact from './components/Contact';
+import LoginPage from './pages/admin/LoginPage';
+import DashboardPage from './pages/admin/DashboardPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
+function MainSite() {
   const [currentPage, setCurrentPage] = useState('home');
 
   const renderPage = () => {
@@ -45,6 +49,25 @@ function App() {
       {renderPage()}
       <Footer setCurrentPage={setCurrentPage} />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/admin/login" element={<LoginPage />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/*" element={<MainSite />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
