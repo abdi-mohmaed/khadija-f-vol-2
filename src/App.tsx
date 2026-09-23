@@ -6,7 +6,7 @@ import MainSite from './components/MainSite';
 
 function App() {
   return (
-    <BrowserRouter basename="/khadija-f-vol-2">
+    <BrowserRouter>
       <Routes>
         <Route path="/admin/login" element={<LoginPage />} />
         <Route
