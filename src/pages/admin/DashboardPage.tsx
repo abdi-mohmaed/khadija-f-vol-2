@@ -130,7 +130,12 @@ const DashboardPage: React.FC = () => {
         const ext = file.name.split('.').pop();
         const filename = `${fieldId}-${Date.now()}.${ext}`;
         const { data, error } = await supabase.storage.from('media').upload(filename, file, { upsert: true });
-        if (error) { console.error(error); setUploading(prev => ({ ...prev, [fieldId]: false })); return; }
+        if (error) { 
+            console.error(error); 
+            alert(`Upload failed: ${error.message}\nMake sure you created the 'media' bucket in Supabase Storage!`);
+            setUploading(prev => ({ ...prev, [fieldId]: false })); 
+            return; 
+        }
         const { data: urlData } = supabase.storage.from('media').getPublicUrl(data.path);
         
         if (dynamicTarget) {
