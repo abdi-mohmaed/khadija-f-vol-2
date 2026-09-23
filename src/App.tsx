@@ -1,4 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LoginPage from './pages/admin/LoginPage';
+import DashboardPage from './pages/admin/DashboardPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import MainSite from './components/MainSite';
 
 function App() {
   return (
@@ -18,4 +22,5 @@ function App() {
     </BrowserRouter>
   );
 }
+
 export default App;
