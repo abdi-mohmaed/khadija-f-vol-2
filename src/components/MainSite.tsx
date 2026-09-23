@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Header from './Header';
 import Hero from './Hero';
-import ImageSlideshow from './ImageSlideshow';
 import Impact from './Impact';
 import RecentProjects from './RecentProjects';
 import OurPrograms from './OurPrograms';
@@ -17,9 +16,9 @@ const MainSite: React.FC = () => {
   const renderContent = () => {
     switch (currentPage) {
       case 'about':
-        return <AboutUs setCurrentPage={setCurrentPage} />;
+        return <AboutUs />;
       case 'programs':
-        return <OurPrograms setCurrentPage={setCurrentPage} />;
+        return <OurPrograms />;
       case 'contact':
         return <Contact />;
       case 'home':
@@ -27,10 +26,9 @@ const MainSite: React.FC = () => {
         return (
           <>
             <Hero setCurrentPage={setCurrentPage} />
-            <ImageSlideshow />
             <Impact />
-            <RecentProjects setCurrentPage={setCurrentPage} />
-            <OurPrograms setCurrentPage={setCurrentPage} />
+            <RecentProjects />
+            <OurPrograms />
             <Newsletter />
             <CallToAction setCurrentPage={setCurrentPage} />
           </>
