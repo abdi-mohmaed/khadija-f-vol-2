@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, Heart, GraduationCap, Home, Droplets, Utensils, Gift, Building, School, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface DynamicItem {
@@ -105,20 +105,14 @@ const OurPrograms = () => {
             if (map['program_hero_subtitle']) setHeroData(p => ({ ...p, subtitle: map['program_hero_subtitle'] }));
             if (map['program_hero_media']) setHeroData(p => ({ ...p, media: map['program_hero_media'] }));
 
-            if (map['programs_data']) {
-                try {
-                    const parsed = JSON.parse(map['programs_data']);
-                    if (parsed && parsed.length > 0) {
-                        setPrograms(parsed);
-                    } else {
-                        setPrograms(defaultPrograms);
-                    }
-                } catch (e) {
-                    setPrograms(defaultPrograms);
+            const updatedPrograms = defaultPrograms.map(prog => {
+                const imageUrl = map[`program_${prog.id}_image`];
+                if (imageUrl) {
+                    return { ...prog, mediaUrl: imageUrl };
                 }
-            } else {
-                setPrograms(defaultPrograms);
-            }
+                return prog;
+            });
+            setPrograms(updatedPrograms);
         } else {
             setPrograms(defaultPrograms);
         }
@@ -188,7 +182,7 @@ const OurPrograms = () => {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {programs.map((program, index) => (
+                        {programs.map((program) => (
                             <div key={program.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                                 <div className="md:flex h-full">
                                     <div className="md:w-1/3">

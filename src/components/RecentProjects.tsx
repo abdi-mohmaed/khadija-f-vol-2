@@ -9,6 +9,7 @@ interface DynamicItem {
     description: string;
     mediaUrl: string;
     mediaType: 'image' | 'video';
+    showInHomepage?: boolean;
 }
 
 const defaultProjects = [
@@ -55,7 +56,7 @@ const RecentProjects = () => {
             try {
                 const parsed = JSON.parse(data.value);
                 if (parsed && parsed.length > 0) {
-                    setProjects(parsed);
+                    setProjects(parsed.filter((p: DynamicItem) => p.showInHomepage !== false));
                 } else {
                     setProjects(defaultProjects);
                 }

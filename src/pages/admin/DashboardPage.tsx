@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import {
     LogOut, Home, Image, FileText, Users, ChevronRight,
-    Save, Upload, Check, AlertCircle, Menu, X, Plus, Trash2, Video
+    Save, Upload, Check, AlertCircle, Menu, X, Plus, Trash2
 } from 'lucide-react';
 
 type ContentMap = Record<string, string>;
@@ -16,6 +16,7 @@ export interface DynamicItem {
     description: string;
     mediaUrl: string;
     mediaType: 'image' | 'video';
+    showInHomepage?: boolean;
 }
 
 const SECTIONS: { id: Section; label: string; icon: React.ReactNode }[] = [
@@ -36,8 +37,19 @@ const FIELDS: Record<Section, { id: string; label: string; type: 'text' | 'texta
         // Hero fields for programs page
         { id: 'program_hero_title', label: 'Program Hero Title', type: 'text' },
         { id: 'program_hero_subtitle', label: 'Program Hero Subtitle', type: 'textarea' },
-        { id: 'program_hero_media', label: 'Program Hero Background Image/Video', type: 'image' }, // Using image component, can paste video link
-    ], // Programs list handled dynamically
+        { id: 'program_hero_media', label: 'Program Hero Background Image/Video', type: 'image' },
+        // 10 Static Programs Image Fields
+        { id: 'program_1_image', label: '1. Orphanages Support Program Image', type: 'image' },
+        { id: 'program_2_image', label: '2. Orphanages School Program Image', type: 'image' },
+        { id: 'program_3_image', label: '3. Low Income Families Support Program Image', type: 'image' },
+        { id: 'program_4_image', label: '4. Low Income Families Housing Program Image', type: 'image' },
+        { id: 'program_5_image', label: '5. Water Supply Aid Program Image', type: 'image' },
+        { id: 'program_6_image', label: '6. Food Aid Program Image', type: 'image' },
+        { id: 'program_7_image', label: '7. Ramadan Food Aid Program Image', type: 'image' },
+        { id: 'program_8_image', label: '8. Eid Adha Program Image', type: 'image' },
+        { id: 'program_9_image', label: '9. Charitable Construction to Mosques Program Image', type: 'image' },
+        { id: 'program_10_image', label: '10. Charitable Construction to Schools Program Image', type: 'image' },
+    ],
     about: [
         { id: 'about_title', label: 'Page Title', type: 'text' },
         { id: 'about_mission', label: 'Mission Statement', type: 'textarea' },
@@ -86,10 +98,9 @@ const DashboardPage: React.FC = () => {
     useEffect(() => {
         setContent(prev => ({
             ...prev,
-            projects_data: JSON.stringify(projects),
-            programs_data: JSON.stringify(programs)
+            projects_data: JSON.stringify(projects)
         }));
-    }, [projects, programs]);
+    }, [projects]);
 
     const handleChange = (id: string, value: string) => {
         setContent(prev => ({ ...prev, [id]: value }));
@@ -150,7 +161,7 @@ const DashboardPage: React.FC = () => {
         setSaving(true);
         setSaveStatus('idle');
         
-        const upsertData = [];
+        const upsertData: { id: string; value: string }[] = [];
         
         // Save regular fields
         if (FIELDS[activeSection]) {
@@ -161,9 +172,6 @@ const DashboardPage: React.FC = () => {
         // Save dynamic fields if on those sections
         if (activeSection === 'recent_projects') {
              upsertData.push({ id: 'projects_data', value: JSON.stringify(projects) });
-        }
-        if (activeSection === 'programs') {
-             upsertData.push({ id: 'programs_data', value: JSON.stringify(programs) });
         }
 
         const { error } = await supabase.from('content').upsert(upsertData);
@@ -185,11 +193,6 @@ const DashboardPage: React.FC = () => {
     const hasUnsavedChanges = (() => {
         if (activeSection === 'recent_projects') {
             return content['projects_data'] !== originalContent['projects_data'];
-        }
-        if (activeSection === 'programs') {
-            const staticChanged = FIELDS.programs.some(f => (content[f.id] || '') !== (originalContent[f.id] || ''));
-            const dynamicChanged = content['programs_data'] !== originalContent['programs_data'];
-            return staticChanged || dynamicChanged;
         }
         return FIELDS[activeSection].some(f => (content[f.id] || '') !== (originalContent[f.id] || ''));
     })();
@@ -214,7 +217,7 @@ const DashboardPage: React.FC = () => {
                     </div>
                 )}
 
-                {items.map((item, index) => (
+                {items.map((item) => (
                     <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative">
                         <button
                             onClick={() => removeDynamicItem(type, item.id)}
@@ -292,6 +295,30 @@ const DashboardPage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {type === 'projects' && (
+                                <div className="flex items-center gap-3 pt-2">
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={item.showInHomepage !== false}
+                                            onChange={e => {
+                                                const setter = setProjects;
+                                                setter(prev => prev.map(p => p.id === item.id ? { ...p, showInHomepage: e.target.checked } : p));
+                                                setSaveStatus('idle');
+                                            }}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                    <span className="text-sm font-semibold text-gray-700">
+                                        Show in Homepage ({item.showInHomepage !== false ? 'ON' : 'OFF'})
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                        {item.showInHomepage !== false ? 'Appears on both homepage slider and project gallery page' : 'Only appears on the projects page'}
+                                    </span>
+                                </div>
+                            )}
 
                             {/* Media Preview */}
                             {item.mediaUrl && (
@@ -515,7 +542,6 @@ const DashboardPage: React.FC = () => {
 
                         {/* Dynamic Lists */}
                         {activeSection === 'recent_projects' && renderDynamicList('projects')}
-                        {activeSection === 'programs' && renderDynamicList('programs')}
                     </div>
                 </main>
             </div>

@@ -147,7 +147,26 @@ UPDATE USING (
 );
 
 -- =============================================
--- Storage bucket: run in Supabase Storage UI
--- Create a bucket named: media
--- Set it to PUBLIC
+-- Storage policies for the 'media' bucket
+-- Run this in the Supabase SQL Editor if uploads fail
 -- =============================================
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('media', 'media', true) 
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Public Read Access" ON storage.objects;
+DROP POLICY IF EXISTS "Auth Insert Access" ON storage.objects;
+DROP POLICY IF EXISTS "Auth Update Access" ON storage.objects;
+
+-- Allow anyone to view public media files
+CREATE POLICY "Public Read Access" ON storage.objects 
+FOR SELECT USING (bucket_id = 'media');
+
+-- Allow logged in admins to upload media files
+CREATE POLICY "Auth Insert Access" ON storage.objects 
+FOR INSERT WITH CHECK (bucket_id = 'media' AND auth.role() = 'authenticated');
+
+-- Allow logged in admins to update media files
+CREATE POLICY "Auth Update Access" ON storage.objects 
+FOR UPDATE USING (bucket_id = 'media' AND auth.role() = 'authenticated');
