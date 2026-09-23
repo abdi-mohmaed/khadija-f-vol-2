@@ -10,6 +10,8 @@ import Newsletter from './Newsletter';
 import CallToAction from './CallToAction';
 import Footer from './Footer';
 
+import ProjectsPage from './ProjectsPage';
+
 const MainSite: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('home');
 
@@ -17,6 +19,8 @@ const MainSite: React.FC = () => {
     switch (currentPage) {
       case 'about':
         return <AboutUs />;
+      case 'projects':
+        return <ProjectsPage />;
       case 'programs':
         return <OurPrograms />;
       case 'contact':

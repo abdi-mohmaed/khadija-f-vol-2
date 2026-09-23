@@ -3,12 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import {
     LogOut, Home, Image, FileText, Users, ChevronRight,
-    Save, Upload, Check, AlertCircle, Menu, X
+    Save, Upload, Check, AlertCircle, Menu, X, Plus, Trash2, Video
 } from 'lucide-react';
 
 type ContentMap = Record<string, string>;
 
 type Section = 'hero' | 'recent_projects' | 'programs' | 'about';
+
+export interface DynamicItem {
+    id: string;
+    title: string;
+    description: string;
+    mediaUrl: string;
+    mediaType: 'image' | 'video';
+}
 
 const SECTIONS: { id: Section; label: string; icon: React.ReactNode }[] = [
     { id: 'hero', label: 'Hero Section', icon: <Home className="w-5 h-5" /> },
@@ -23,28 +31,13 @@ const FIELDS: Record<Section, { id: string; label: string; type: 'text' | 'texta
         { id: 'hero_subtitle', label: 'Subtitle / Description', type: 'textarea' },
         { id: 'hero_image', label: 'Background Image', type: 'image' },
     ],
-    recent_projects: [
-        { id: 'project_1_title', label: 'Project 1 — Title', type: 'text' },
-        { id: 'project_1_description', label: 'Project 1 — Description', type: 'textarea' },
-        { id: 'project_1_image', label: 'Project 1 — Image', type: 'image' },
-        { id: 'project_2_title', label: 'Project 2 — Title', type: 'text' },
-        { id: 'project_2_description', label: 'Project 2 — Description', type: 'textarea' },
-        { id: 'project_2_image', label: 'Project 2 — Image', type: 'image' },
-        { id: 'project_3_title', label: 'Project 3 — Title', type: 'text' },
-        { id: 'project_3_description', label: 'Project 3 — Description', type: 'textarea' },
-        { id: 'project_3_image', label: 'Project 3 — Image', type: 'image' },
-    ],
+    recent_projects: [], // Handled dynamically
     programs: [
-        { id: 'program_1_title', label: 'Program 1 — Title', type: 'text' },
-        { id: 'program_1_description', label: 'Program 1 — Description', type: 'textarea' },
-        { id: 'program_1_image', label: 'Program 1 — Image', type: 'image' },
-        { id: 'program_2_title', label: 'Program 2 — Title', type: 'text' },
-        { id: 'program_2_description', label: 'Program 2 — Description', type: 'textarea' },
-        { id: 'program_2_image', label: 'Program 2 — Image', type: 'image' },
-        { id: 'program_3_title', label: 'Program 3 — Title', type: 'text' },
-        { id: 'program_3_description', label: 'Program 3 — Description', type: 'textarea' },
-        { id: 'program_3_image', label: 'Program 3 — Image', type: 'image' },
-    ],
+        // Hero fields for programs page
+        { id: 'program_hero_title', label: 'Program Hero Title', type: 'text' },
+        { id: 'program_hero_subtitle', label: 'Program Hero Subtitle', type: 'textarea' },
+        { id: 'program_hero_media', label: 'Program Hero Background Image/Video', type: 'image' }, // Using image component, can paste video link
+    ], // Programs list handled dynamically
     about: [
         { id: 'about_title', label: 'Page Title', type: 'text' },
         { id: 'about_mission', label: 'Mission Statement', type: 'textarea' },
@@ -57,6 +50,11 @@ const DashboardPage: React.FC = () => {
     const [activeSection, setActiveSection] = useState<Section>('hero');
     const [content, setContent] = useState<ContentMap>({});
     const [originalContent, setOriginalContent] = useState<ContentMap>({});
+    
+    // Dynamic Arrays State
+    const [projects, setProjects] = useState<DynamicItem[]>([]);
+    const [programs, setPrograms] = useState<DynamicItem[]>([]);
+
     const [saving, setSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [uploading, setUploading] = useState<Record<string, boolean>>({});
@@ -75,32 +73,102 @@ const DashboardPage: React.FC = () => {
         (data || []).forEach((row: { id: string; value: string }) => { map[row.id] = row.value; });
         setContent(map);
         setOriginalContent(map);
+
+        try {
+            if (map['projects_data']) setProjects(JSON.parse(map['projects_data']));
+            if (map['programs_data']) setPrograms(JSON.parse(map['programs_data']));
+        } catch (e) {
+            console.error("Failed to parse dynamic data", e);
+        }
     };
+
+    // Keep content in sync with dynamic arrays to trigger hasUnsavedChanges
+    useEffect(() => {
+        setContent(prev => ({
+            ...prev,
+            projects_data: JSON.stringify(projects),
+            programs_data: JSON.stringify(programs)
+        }));
+    }, [projects, programs]);
 
     const handleChange = (id: string, value: string) => {
         setContent(prev => ({ ...prev, [id]: value }));
         setSaveStatus('idle');
     };
 
-    const handleImageUpload = async (fieldId: string, file: File) => {
+    const handleDynamicChange = (
+        type: 'projects' | 'programs',
+        id: string,
+        field: keyof DynamicItem,
+        value: string
+    ) => {
+        const setter = type === 'projects' ? setProjects : setPrograms;
+        setter(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+        setSaveStatus('idle');
+    };
+
+    const addDynamicItem = (type: 'projects' | 'programs') => {
+        const setter = type === 'projects' ? setProjects : setPrograms;
+        setter(prev => [...prev, {
+            id: Date.now().toString(),
+            title: '',
+            description: '',
+            mediaUrl: '',
+            mediaType: 'image'
+        }]);
+        setSaveStatus('idle');
+    };
+
+    const removeDynamicItem = (type: 'projects' | 'programs', id: string) => {
+        const setter = type === 'projects' ? setProjects : setPrograms;
+        setter(prev => prev.filter(item => item.id !== id));
+        setSaveStatus('idle');
+    };
+
+    const handleImageUpload = async (fieldId: string, file: File, dynamicTarget?: { type: 'projects'|'programs', id: string }) => {
         setUploading(prev => ({ ...prev, [fieldId]: true }));
         const ext = file.name.split('.').pop();
         const filename = `${fieldId}-${Date.now()}.${ext}`;
         const { data, error } = await supabase.storage.from('media').upload(filename, file, { upsert: true });
         if (error) { console.error(error); setUploading(prev => ({ ...prev, [fieldId]: false })); return; }
         const { data: urlData } = supabase.storage.from('media').getPublicUrl(data.path);
-        handleChange(fieldId, urlData.publicUrl);
+        
+        if (dynamicTarget) {
+            handleDynamicChange(dynamicTarget.type, dynamicTarget.id, 'mediaUrl', urlData.publicUrl);
+        } else {
+            handleChange(fieldId, urlData.publicUrl);
+        }
         setUploading(prev => ({ ...prev, [fieldId]: false }));
     };
 
     const handleSave = async () => {
         setSaving(true);
         setSaveStatus('idle');
-        const fields = FIELDS[activeSection];
-        const upsertData = fields.map(f => ({ id: f.id, value: content[f.id] || '' }));
+        
+        const upsertData = [];
+        
+        // Save regular fields
+        if (FIELDS[activeSection]) {
+             const fields = FIELDS[activeSection];
+             upsertData.push(...fields.map(f => ({ id: f.id, value: content[f.id] || '' })));
+        }
+
+        // Save dynamic fields if on those sections
+        if (activeSection === 'recent_projects') {
+             upsertData.push({ id: 'projects_data', value: JSON.stringify(projects) });
+        }
+        if (activeSection === 'programs') {
+             upsertData.push({ id: 'programs_data', value: JSON.stringify(programs) });
+        }
+
         const { error } = await supabase.from('content').upsert(upsertData);
         setSaving(false);
-        if (error) { setSaveStatus('error'); } else { setSaveStatus('success'); setOriginalContent(prev => ({ ...prev, ...Object.fromEntries(upsertData.map(r => [r.id, r.value])) })); }
+        if (error) { 
+            setSaveStatus('error'); 
+        } else { 
+            setSaveStatus('success'); 
+            setOriginalContent(prev => ({ ...prev, ...Object.fromEntries(upsertData.map(r => [r.id, r.value])) })); 
+        }
         setTimeout(() => setSaveStatus('idle'), 3000);
     };
 
@@ -109,9 +177,140 @@ const DashboardPage: React.FC = () => {
         navigate('/admin/login');
     };
 
-    const hasUnsavedChanges = FIELDS[activeSection].some(
-        f => (content[f.id] || '') !== (originalContent[f.id] || '')
-    );
+    const hasUnsavedChanges = (() => {
+        if (activeSection === 'recent_projects') {
+            return content['projects_data'] !== originalContent['projects_data'];
+        }
+        if (activeSection === 'programs') {
+            const staticChanged = FIELDS.programs.some(f => (content[f.id] || '') !== (originalContent[f.id] || ''));
+            const dynamicChanged = content['programs_data'] !== originalContent['programs_data'];
+            return staticChanged || dynamicChanged;
+        }
+        return FIELDS[activeSection].some(f => (content[f.id] || '') !== (originalContent[f.id] || ''));
+    })();
+
+    const renderDynamicList = (type: 'projects' | 'programs') => {
+        const items = type === 'projects' ? projects : programs;
+        return (
+            <div className="space-y-6 mt-6">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-gray-900 capitalize">{type} List</h2>
+                    <button
+                        onClick={() => addDynamicItem(type)}
+                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                    >
+                        <Plus className="w-4 h-4" /> Add {type === 'projects' ? 'Project' : 'Program'}
+                    </button>
+                </div>
+
+                {items.length === 0 && (
+                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                        <p className="text-gray-500">No items added yet. Click the button above to add one.</p>
+                    </div>
+                )}
+
+                {items.map((item, index) => (
+                    <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative">
+                        <button
+                            onClick={() => removeDynamicItem(type, item.id)}
+                            className="absolute top-4 right-4 text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg transition"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="space-y-4 pr-12">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
+                                <input
+                                    type="text"
+                                    value={item.title}
+                                    onChange={e => handleDynamicChange(type, item.id, 'title', e.target.value)}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                                    placeholder="Enter title..."
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    value={item.description}
+                                    onChange={e => handleDynamicChange(type, item.id, 'description', e.target.value)}
+                                    rows={3}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 resize-vertical"
+                                    placeholder="Enter description..."
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Media Type</label>
+                                    <select
+                                        value={item.mediaType}
+                                        onChange={e => handleDynamicChange(type, item.id, 'mediaType', e.target.value as 'image'|'video')}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 bg-white"
+                                    >
+                                        <option value="image">Image</option>
+                                        <option value="video">Video</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                                        Media URL <span className="font-normal text-gray-500 text-xs">(Paste URL or upload)</span>
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={item.mediaUrl}
+                                            onChange={e => handleDynamicChange(type, item.id, 'mediaUrl', e.target.value)}
+                                            className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-sm"
+                                            placeholder={`https://...`}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRefs.current[`${type}-${item.id}`]?.click()}
+                                            disabled={uploading[`${type}-${item.id}`]}
+                                            className="flex items-center justify-center bg-gray-100 border border-gray-300 text-gray-700 px-4 rounded-lg hover:bg-gray-200 transition disabled:opacity-50"
+                                        >
+                                            <Upload className="w-4 h-4" />
+                                        </button>
+                                        <input
+                                            ref={el => { fileInputRefs.current[`${type}-${item.id}`] = el; }}
+                                            type="file"
+                                            accept={item.mediaType === 'image' ? "image/*" : "video/*"}
+                                            className="hidden"
+                                            onChange={e => { 
+                                                if (e.target.files?.[0]) 
+                                                    handleImageUpload(`${type}-${item.id}`, e.target.files[0], { type, id: item.id }); 
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Media Preview */}
+                            {item.mediaUrl && (
+                                <div className="mt-2 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center h-48 w-full max-w-md">
+                                    {item.mediaType === 'image' ? (
+                                        <img src={item.mediaUrl} alt="Preview" className="max-h-full max-w-full object-contain" />
+                                    ) : item.mediaUrl.includes('youtube.com') || item.mediaUrl.includes('youtu.be') ? (
+                                        <iframe 
+                                            src={item.mediaUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} 
+                                            className="w-full h-full" 
+                                            allowFullScreen 
+                                        />
+                                    ) : (
+                                        <video src={item.mediaUrl} controls className="max-h-full max-w-full" />
+                                    )}
+                                </div>
+                            )}
+
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
     const renderField = (field: typeof FIELDS[Section][0]) => {
         const value = content[field.id] || '';
@@ -140,7 +339,11 @@ const DashboardPage: React.FC = () => {
                 <div className="space-y-3">
                     {value && (
                         <div className="relative rounded-lg overflow-hidden border border-gray-200 h-40 bg-gray-50">
-                            <img src={value} alt="preview" className="w-full h-full object-cover" />
+                            {value.includes('.mp4') || value.includes('video') ? (
+                                <video src={value} controls className="w-full h-full object-cover" />
+                            ) : (
+                                <img src={value} alt="preview" className="w-full h-full object-cover" />
+                            )}
                         </div>
                     )}
                     <div className="flex gap-3 flex-wrap">
@@ -151,12 +354,12 @@ const DashboardPage: React.FC = () => {
                             className="flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium disabled:opacity-50"
                         >
                             <Upload className="w-4 h-4" />
-                            {uploading[field.id] ? 'Uploading...' : 'Upload Image'}
+                            {uploading[field.id] ? 'Uploading...' : 'Upload Media'}
                         </button>
                         <input
                             ref={el => { fileInputRefs.current[field.id] = el; }}
                             type="file"
-                            accept="image/*"
+                            accept="image/*,video/*"
                             className="hidden"
                             onChange={e => { if (e.target.files?.[0]) handleImageUpload(field.id, e.target.files[0]); }}
                         />
@@ -164,7 +367,7 @@ const DashboardPage: React.FC = () => {
                             type="text"
                             value={value}
                             onChange={e => handleChange(field.id, e.target.value)}
-                            placeholder="Or paste image URL..."
+                            placeholder="Or paste media URL..."
                             className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-800"
                         />
                     </div>
@@ -288,7 +491,7 @@ const DashboardPage: React.FC = () => {
                 </header>
 
                 {/* Content */}
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-24">
                     {hasUnsavedChanges && (
                         <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -297,12 +500,17 @@ const DashboardPage: React.FC = () => {
                     )}
 
                     <div className="space-y-6 max-w-3xl">
+                        {/* Static Fields */}
                         {FIELDS[activeSection].map(field => (
                             <div key={field.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                 <label className="block text-sm font-semibold text-gray-700 mb-3">{field.label}</label>
                                 {renderField(field)}
                             </div>
                         ))}
+
+                        {/* Dynamic Lists */}
+                        {activeSection === 'recent_projects' && renderDynamicList('projects')}
+                        {activeSection === 'programs' && renderDynamicList('programs')}
                     </div>
                 </main>
             </div>

@@ -21,6 +21,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, setCurrentPage }) => {
   const navItems = [
     { id: 'home', label: 'Home' },
     { id: 'about', label: 'About Us' },
+    { id: 'projects', label: 'Projects' },
     { id: 'programs', label: 'Our Programs' },
     { id: 'contact', label: 'Contact' }
   ];
